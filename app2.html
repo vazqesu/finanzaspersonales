@@ -1,0 +1,1568 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finanzas Personales - MultiUsuario</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #2c3e50, #4a6491);
+            color: white;
+            padding: 20px 0;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+        
+        h1 {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            text-align: center;
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .user-info {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .user-welcome {
+            font-size: 1rem;
+        }
+        
+        .logout-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 8px 15px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background 0.3s;
+        }
+        
+        .logout-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        nav {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        
+        .nav-button {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 20px;
+            margin: 0 10px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: background 0.3s;
+        }
+        
+        .nav-button:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        .nav-button.active {
+            background: rgba(255, 255, 255, 0.4);
+            font-weight: bold;
+        }
+        
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        @media (max-width: 768px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .balance-card {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+        
+        .balance-card h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 10px;
+        }
+        
+        .chart-container {
+            height: 300px;
+            position: relative;
+        }
+        
+        .accounts-summary {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        
+        .account-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+        
+        .hsbc {
+            background-color: rgba(255, 99, 132, 0.1);
+            border-left: 4px solid #ff6384;
+        }
+        
+        .bbva {
+            background-color: rgba(54, 162, 235, 0.1);
+            border-left: 4px solid #36a2eb;
+        }
+        
+        .efectivo {
+            background-color: rgba(75, 192, 192, 0.1);
+            border-left: 4px solid #4bc0c0;
+        }
+        
+        .dolares {
+            background-color: rgba(255, 159, 64, 0.1);
+            border-left: 4px solid #ff9f40;
+        }
+        
+        .transactions-section {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            margin-bottom: 30px;
+        }
+        
+        .transactions-section h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 10px;
+        }
+        
+        .transaction-form {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr auto;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .transaction-form {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        label {
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #555;
+        }
+        
+        select, input {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+        
+        .confirmation-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .confirmation-checkbox {
+            width: 20px;
+            height: 20px;
+        }
+        
+        .confirmation-label {
+            font-size: 0.9rem;
+            color: #555;
+        }
+        
+        button {
+            background: #4a6491;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 15px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: background 0.3s;
+            align-self: flex-end;
+        }
+        
+        button:hover {
+            background: #3a5379;
+        }
+        
+        button:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+        }
+        
+        .transaction-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .transaction-item {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .transaction-item:last-child {
+            border-bottom: none;
+        }
+        
+        .transaction-header {
+            font-weight: bold;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+        }
+        
+        .deposit {
+            color: #28a745;
+        }
+        
+        .withdrawal {
+            color: #dc3545;
+        }
+        
+        .total-balance {
+            text-align: center;
+            font-size: 2rem;
+            font-weight: bold;
+            color: #2c3e50;
+            margin: 20px 0;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            padding: 20px;
+            color: #777;
+            font-size: 0.9rem;
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 5px;
+            color: white;
+            font-weight: 500;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .notification.success {
+            background-color: #28a745;
+            opacity: 1;
+        }
+        
+        .notification.error {
+            background-color: #dc3545;
+            opacity: 1;
+        }
+        
+        /* Estilos para la página de Forecast */
+        .forecast-section {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            margin-bottom: 30px;
+        }
+        
+        .forecast-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        .forecast-table th, .forecast-table td {
+            padding: 12px 15px;
+            text-align: center;
+            border: 1px solid #ddd;
+        }
+        
+        .forecast-table th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+        }
+        
+        .forecast-table input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            text-align: center;
+        }
+        
+        .forecast-table .subtotal {
+            background-color: #e9f7ef;
+            font-weight: bold;
+        }
+        
+        .forecast-table .total {
+            background-color: #d1ecf1;
+            font-weight: bold;
+        }
+        
+        .forecast-table .concept {
+            text-align: left;
+            font-weight: 500;
+        }
+        
+        .section-title {
+            background-color: #e9ecef !important;
+            font-weight: bold;
+            text-align: left;
+            font-size: 1.1rem;
+        }
+        
+        .delete-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 5px 10px;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+        
+        .delete-btn:hover {
+            background: #c82333;
+        }
+        
+        .confirm-add-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 5px 10px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            margin-right: 5px;
+        }
+        
+        .cancel-add-btn {
+            background: #6c757d;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 5px 10px;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+        
+        .add-income-btn, .add-expense-btn {
+            margin-top: 15px;
+            margin-right: 10px;
+        }
+        
+        .add-income-btn {
+            background: #28a745;
+        }
+        
+        .add-income-btn:hover {
+            background: #218838;
+        }
+        
+        .add-expense-btn {
+            background: #dc3545;
+        }
+        
+        .add-expense-btn:hover {
+            background: #c82333;
+        }
+        
+        .page {
+            display: none;
+        }
+        
+        .page.active {
+            display: block;
+        }
+        
+        .concept-input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        
+        .confirmation-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .confirmation-content {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+        }
+        
+        .confirmation-buttons {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+        
+        .confirm-btn {
+            background: #28a745;
+        }
+        
+        .cancel-btn {
+            background: #6c757d;
+        }
+        
+        .profit {
+            color: #28a745;
+            font-weight: bold;
+        }
+        
+        .loss {
+            color: #dc3545;
+            font-weight: bold;
+        }
+        
+        .temp-row {
+            background-color: #fff3cd;
+        }
+        
+        /* Estilos para el sistema de login/registro */
+        .auth-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 80vh;
+        }
+        
+        .auth-form {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+        
+        .auth-form h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #2c3e50;
+        }
+        
+        .auth-form .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .auth-form button {
+            width: 100%;
+            margin-top: 10px;
+        }
+        
+        .auth-switch {
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .auth-switch a {
+            color: #4a6491;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        
+        .auth-switch a:hover {
+            text-decoration: underline;
+        }
+        
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Sistema de Autenticación -->
+        <div id="auth-section">
+            <div class="auth-container">
+                <div class="auth-form" id="login-form">
+                    <h2>Iniciar Sesión</h2>
+                    <div class="form-group">
+                        <label for="login-email">Email</label>
+                        <input type="email" id="login-email" placeholder="tu@email.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="login-password">Contraseña</label>
+                        <input type="password" id="login-password" placeholder="Tu contraseña">
+                    </div>
+                    <button id="login-btn">Iniciar Sesión</button>
+                    <div class="auth-switch">
+                        ¿No tienes cuenta? <a id="switch-to-register">Regístrate aquí</a>
+                    </div>
+                </div>
+                
+                <div class="auth-form hidden" id="register-form">
+                    <h2>Crear Cuenta</h2>
+                    <div class="form-group">
+                        <label for="register-name">Nombre</label>
+                        <input type="text" id="register-name" placeholder="Tu nombre">
+                    </div>
+                    <div class="form-group">
+                        <label for="register-email">Email</label>
+                        <input type="email" id="register-email" placeholder="tu@email.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="register-password">Contraseña</label>
+                        <input type="password" id="register-password" placeholder="Mínimo 6 caracteres">
+                    </div>
+                    <button id="register-btn">Crear Cuenta</button>
+                    <div class="auth-switch">
+                        ¿Ya tienes cuenta? <a id="switch-to-login">Inicia sesión aquí</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Aplicación Principal (oculta inicialmente) -->
+        <div id="app-section" class="hidden">
+            <header>
+                <h1>Mis Finanzas Personales</h1>
+                <p class="subtitle">Controla tus ingresos y gastos de forma sencilla</p>
+                <div class="user-info">
+                    <span class="user-welcome" id="user-welcome">Bienvenido, Usuario</span>
+                    <button class="logout-btn" id="logout-btn">Cerrar Sesión</button>
+                </div>
+                <nav>
+                    <button class="nav-button active" data-page="dashboard">Dashboard</button>
+                    <button class="nav-button" data-page="forecast">Forecast</button>
+                </nav>
+            </header>
+            
+            <!-- Página Dashboard -->
+            <div id="dashboard" class="page active">
+                <div class="total-balance">
+                    Balance Total: $<span id="total-balance">0.00</span>
+                </div>
+                
+                <div class="dashboard">
+                    <div class="balance-card">
+                        <h2>Distribución de Fondos</h2>
+                        <div class="chart-container">
+                            <canvas id="balance-chart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <div class="balance-card">
+                        <h2>Resumen por Cuenta</h2>
+                        <div class="accounts-summary">
+                            <div class="account-item hsbc">
+                                <span>HSBC</span>
+                                <span id="hsbc-balance">$0.00</span>
+                            </div>
+                            <div class="account-item bbva">
+                                <span>BBVA</span>
+                                <span id="bbva-balance">$0.00</span>
+                            </div>
+                            <div class="account-item efectivo">
+                                <span>Efectivo</span>
+                                <span id="efectivo-balance">$0.00</span>
+                            </div>
+                            <div class="account-item dolares">
+                                <span>Dólares</span>
+                                <span id="dolares-balance">$0.00</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="transactions-section">
+                    <h2>Registro de Transacciones</h2>
+                    
+                    <div class="transaction-form">
+                        <div class="form-group">
+                            <label for="account">Cuenta</label>
+                            <select id="account">
+                                <option value="hsbc">HSBC</option>
+                                <option value="bbva">BBVA</option>
+                                <option value="efectivo">Efectivo</option>
+                                <option value="dolares">Dólares</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="type">Tipo</label>
+                            <select id="type">
+                                <option value="deposit">Depósito</option>
+                                <option value="withdrawal">Retiro</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="amount">Monto</label>
+                            <input type="number" id="amount" placeholder="0.00" min="0" step="0.01">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="description">Descripción</label>
+                            <input type="text" id="description" placeholder="Concepto">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>&nbsp;</label>
+                            <div class="confirmation-group">
+                                <input type="checkbox" id="confirmation" class="confirmation-checkbox">
+                                <label for="confirmation" class="confirmation-label">Confirmo esta transacción</label>
+                            </div>
+                            <button id="add-transaction" disabled>Agregar</button>
+                        </div>
+                    </div>
+                    
+                    <div class="transaction-list">
+                        <div class="transaction-item transaction-header">
+                            <div>Cuenta</div>
+                            <div>Tipo</div>
+                            <div>Monto</div>
+                            <div>Descripción</div>
+                        </div>
+                        <div id="transactions-container">
+                            <!-- Las transacciones se agregarán aquí dinámicamente -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Página Forecast -->
+            <div id="forecast" class="page">
+                <div class="forecast-section">
+                    <h2>Forecast Mensual</h2>
+                    <p>Planifica tus ingresos y gastos para las próximas 4 semanas</p>
+                    
+                    <table class="forecast-table">
+                        <thead>
+                            <tr>
+                                <th>Concepto/Semana</th>
+                                <th>Semana 1</th>
+                                <th>Semana 2</th>
+                                <th>Semana 3</th>
+                                <th>Semana 4</th>
+                                <th>Total Mensual</th>
+                                <th>Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody id="forecast-body">
+                            <!-- Las filas se agregarán dinámicamente -->
+                        </tbody>
+                    </table>
+                    
+                    <div class="forecast-buttons">
+                        <button id="add-income" class="add-income-btn">Agregar Ingreso</button>
+                        <button id="add-expense" class="add-expense-btn">Agregar Gasto</button>
+                    </div>
+                </div>
+            </div>
+            
+            <footer>
+                <p>© 2023 - Gestor de Finanzas Personales | Desarrollado para controlar tus finanzas</p>
+            </footer>
+        </div>
+    </div>
+
+    <!-- Modal de confirmación -->
+    <div id="confirmation-modal" class="confirmation-modal">
+        <div class="confirmation-content">
+            <h3 id="confirmation-message">¿Estás seguro de eliminar este elemento?</h3>
+            <div class="confirmation-buttons">
+                <button id="confirm-action" class="confirm-btn">Sí, eliminar</button>
+                <button id="cancel-action" class="cancel-btn">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="notification" class="notification"></div>
+
+    <script>
+        // Sistema de Usuarios
+        let users = JSON.parse(localStorage.getItem('financeUsers')) || {};
+        let currentUser = null;
+
+        // Datos por usuario
+        let accounts = {
+            hsbc: 1500,
+            bbva: 2300,
+            efectivo: 500,
+            dolares: 800
+        };
+        
+        let transactions = [
+            { account: 'hsbc', type: 'deposit', amount: 1500, description: 'Saldo inicial', date: new Date().toLocaleString() },
+            { account: 'bbva', type: 'deposit', amount: 2300, description: 'Saldo inicial', date: new Date().toLocaleString() },
+            { account: 'efectivo', type: 'deposit', amount: 500, description: 'Saldo inicial', date: new Date().toLocaleString() },
+            { account: 'dolares', type: 'deposit', amount: 800, description: 'Saldo inicial', date: new Date().toLocaleString() }
+        ];
+        
+        // Variables para el modal de confirmación
+        let pendingAction = null;
+        let pendingRow = null;
+        
+        // Elementos del DOM
+        const authSection = document.getElementById('auth-section');
+        const appSection = document.getElementById('app-section');
+        const loginForm = document.getElementById('login-form');
+        const registerForm = document.getElementById('register-form');
+        const loginBtn = document.getElementById('login-btn');
+        const registerBtn = document.getElementById('register-btn');
+        const switchToRegister = document.getElementById('switch-to-register');
+        const switchToLogin = document.getElementById('switch-to-login');
+        const userWelcome = document.getElementById('user-welcome');
+        const logoutBtn = document.getElementById('logout-btn');
+        
+        const totalBalanceElement = document.getElementById('total-balance');
+        const hsbcBalanceElement = document.getElementById('hsbc-balance');
+        const bbvaBalanceElement = document.getElementById('bbva-balance');
+        const efectivoBalanceElement = document.getElementById('efectivo-balance');
+        const dolaresBalanceElement = document.getElementById('dolares-balance');
+        const transactionsContainer = document.getElementById('transactions-container');
+        const addTransactionButton = document.getElementById('add-transaction');
+        const confirmationCheckbox = document.getElementById('confirmation');
+        const notificationElement = document.getElementById('notification');
+        const forecastBody = document.getElementById('forecast-body');
+        const addIncomeButton = document.getElementById('add-income');
+        const addExpenseButton = document.getElementById('add-expense');
+        const navButtons = document.querySelectorAll('.nav-button');
+        const pages = document.querySelectorAll('.page');
+        const confirmationModal = document.getElementById('confirmation-modal');
+        const confirmationMessage = document.getElementById('confirmation-message');
+        const confirmActionButton = document.getElementById('confirm-action');
+        const cancelActionButton = document.getElementById('cancel-action');
+        
+        // Inicializar gráfico
+        let balanceChart;
+        function initChart() {
+            const ctx = document.getElementById('balance-chart').getContext('2d');
+            balanceChart = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: ['HSBC', 'BBVA', 'Efectivo', 'Dólares'],
+                    datasets: [{
+                        data: [0, 0, 0, 0],
+                        backgroundColor: [
+                            '#ff6384',
+                            '#36a2eb',
+                            '#4bc0c0',
+                            '#ff9f40'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.label || '';
+                                    const value = context.raw || 0;
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = Math.round((value / total) * 100);
+                                    return `${label}: $${value.toFixed(2)} (${percentage}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Sistema de Autenticación
+        function showAuth() {
+            authSection.classList.remove('hidden');
+            appSection.classList.add('hidden');
+        }
+
+        function showApp() {
+            authSection.classList.add('hidden');
+            appSection.classList.remove('hidden');
+            initChart();
+            loadUserData();
+        }
+
+        function registerUser(name, email, password) {
+            if (users[email]) {
+                showNotification('Este email ya está registrado', 'error');
+                return false;
+            }
+            
+            if (password.length < 6) {
+                showNotification('La contraseña debe tener al menos 6 caracteres', 'error');
+                return false;
+            }
+            
+            users[email] = {
+                name: name,
+                email: email,
+                password: password, // En un caso real, esto debería estar encriptado
+                accounts: {
+                    hsbc: 1500,
+                    bbva: 2300,
+                    efectivo: 500,
+                    dolares: 800
+                },
+                transactions: [
+                    { account: 'hsbc', type: 'deposit', amount: 1500, description: 'Saldo inicial', date: new Date().toLocaleString() },
+                    { account: 'bbva', type: 'deposit', amount: 2300, description: 'Saldo inicial', date: new Date().toLocaleString() },
+                    { account: 'efectivo', type: 'deposit', amount: 500, description: 'Saldo inicial', date: new Date().toLocaleString() },
+                    { account: 'dolares', type: 'deposit', amount: 800, description: 'Saldo inicial', date: new Date().toLocaleString() }
+                ],
+                forecast: {}
+            };
+            
+            localStorage.setItem('financeUsers', JSON.stringify(users));
+            showNotification('Cuenta creada exitosamente', 'success');
+            return true;
+        }
+
+        function loginUser(email, password) {
+            const user = users[email];
+            if (!user || user.password !== password) {
+                showNotification('Email o contraseña incorrectos', 'error');
+                return false;
+            }
+            
+            currentUser = user;
+            userWelcome.textContent = `Bienvenido, ${user.name}`;
+            showApp();
+            showNotification(`Bienvenido de nuevo, ${user.name}`, 'success');
+            return true;
+        }
+
+        function logoutUser() {
+            currentUser = null;
+            showAuth();
+            // Limpiar formularios
+            document.getElementById('login-email').value = '';
+            document.getElementById('login-password').value = '';
+            document.getElementById('register-name').value = '';
+            document.getElementById('register-email').value = '';
+            document.getElementById('register-password').value = '';
+        }
+
+        function loadUserData() {
+            if (!currentUser) return;
+            
+            accounts = currentUser.accounts;
+            transactions = currentUser.transactions;
+            
+            updateBalances();
+            renderTransactions();
+            initForecastTable();
+        }
+
+        function saveUserData() {
+            if (!currentUser) return;
+            
+            // Actualizar datos del usuario actual
+            users[currentUser.email].accounts = accounts;
+            users[currentUser.email].transactions = transactions;
+            
+            localStorage.setItem('financeUsers', JSON.stringify(users));
+        }
+
+        // Event Listeners para autenticación
+        loginBtn.addEventListener('click', () => {
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            
+            if (!email || !password) {
+                showNotification('Por favor completa todos los campos', 'error');
+                return;
+            }
+            
+            loginUser(email, password);
+        });
+
+        registerBtn.addEventListener('click', () => {
+            const name = document.getElementById('register-name').value;
+            const email = document.getElementById('register-email').value;
+            const password = document.getElementById('register-password').value;
+            
+            if (!name || !email || !password) {
+                showNotification('Por favor completa todos los campos', 'error');
+                return;
+            }
+            
+            if (registerUser(name, email, password)) {
+                // Cambiar a formulario de login después del registro exitoso
+                registerForm.classList.add('hidden');
+                loginForm.classList.remove('hidden');
+                document.getElementById('login-email').value = email;
+            }
+        });
+
+        switchToRegister.addEventListener('click', () => {
+            loginForm.classList.add('hidden');
+            registerForm.classList.remove('hidden');
+        });
+
+        switchToLogin.addEventListener('click', () => {
+            registerForm.classList.add('hidden');
+            loginForm.classList.remove('hidden');
+        });
+
+        logoutBtn.addEventListener('click', logoutUser);
+
+        // Verificar si hay un usuario logueado al cargar la página
+        function checkLoggedIn() {
+            const savedUserEmail = localStorage.getItem('currentUser');
+            if (savedUserEmail && users[savedUserEmail]) {
+                currentUser = users[savedUserEmail];
+                userWelcome.textContent = `Bienvenido, ${currentUser.name}`;
+                showApp();
+            } else {
+                showAuth();
+            }
+        }
+
+        // Navegación entre páginas
+        navButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const pageId = button.getAttribute('data-page');
+                
+                // Actualizar botones activos
+                navButtons.forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+                
+                // Mostrar página correspondiente
+                pages.forEach(page => page.classList.remove('active'));
+                document.getElementById(pageId).classList.add('active');
+                
+                // Si es la página de forecast, inicializar la tabla
+                if (pageId === 'forecast') {
+                    initForecastTable();
+                }
+            });
+        });
+        
+        // Mostrar notificación
+        function showNotification(message, type) {
+            notificationElement.textContent = message;
+            notificationElement.className = `notification ${type}`;
+            
+            setTimeout(() => {
+                notificationElement.className = 'notification';
+            }, 3000);
+        }
+        
+        // Actualizar balances y gráfico
+        function updateBalances() {
+            // Calcular balance total
+            const totalBalance = Object.values(accounts).reduce((sum, value) => sum + value, 0);
+            totalBalanceElement.textContent = totalBalance.toFixed(2);
+            
+            // Actualizar balances individuales
+            hsbcBalanceElement.textContent = `$${accounts.hsbc.toFixed(2)}`;
+            bbvaBalanceElement.textContent = `$${accounts.bbva.toFixed(2)}`;
+            efectivoBalanceElement.textContent = `$${accounts.efectivo.toFixed(2)}`;
+            dolaresBalanceElement.textContent = `$${accounts.dolares.toFixed(2)}`;
+            
+            // Actualizar gráfico
+            if (balanceChart) {
+                balanceChart.data.datasets[0].data = [
+                    accounts.hsbc,
+                    accounts.bbva,
+                    accounts.efectivo,
+                    accounts.dolares
+                ];
+                balanceChart.update();
+            }
+            
+            // Guardar datos del usuario
+            saveUserData();
+        }
+        
+        // Validar formulario
+        function validateForm() {
+            const amount = parseFloat(document.getElementById('amount').value);
+            const description = document.getElementById('description').value;
+            const isConfirmed = confirmationCheckbox.checked;
+            
+            if (!amount || amount <= 0 || !description.trim() || !isConfirmed) {
+                addTransactionButton.disabled = true;
+            } else {
+                addTransactionButton.disabled = false;
+            }
+        }
+        
+        // Agregar transacción
+        function addTransaction() {
+            const account = document.getElementById('account').value;
+            const type = document.getElementById('type').value;
+            const amount = parseFloat(document.getElementById('amount').value);
+            const description = document.getElementById('description').value;
+            
+            // Validar entrada
+            if (!amount || amount <= 0) {
+                showNotification('Por favor ingresa un monto válido', 'error');
+                return;
+            }
+            
+            if (!description.trim()) {
+                showNotification('Por favor ingresa una descripción', 'error');
+                return;
+            }
+            
+            // Actualizar cuenta
+            if (type === 'deposit') {
+                accounts[account] += amount;
+                showNotification(`Depósito de $${amount.toFixed(2)} realizado en ${account.toUpperCase()}`, 'success');
+            } else {
+                if (accounts[account] < amount) {
+                    showNotification('Fondos insuficientes en esta cuenta', 'error');
+                    return;
+                }
+                accounts[account] -= amount;
+                showNotification(`Retiro de $${amount.toFixed(2)} realizado de ${account.toUpperCase()}`, 'success');
+            }
+            
+            // Agregar transacción a la lista
+            const transaction = {
+                account,
+                type,
+                amount,
+                description,
+                date: new Date().toLocaleString()
+            };
+            
+            transactions.unshift(transaction);
+            renderTransactions();
+            updateBalances();
+            
+            // Limpiar formulario
+            document.getElementById('amount').value = '';
+            document.getElementById('description').value = '';
+            confirmationCheckbox.checked = false;
+            validateForm();
+        }
+        
+        // Renderizar lista de transacciones
+        function renderTransactions() {
+            transactionsContainer.innerHTML = '';
+            
+            transactions.forEach(transaction => {
+                const transactionElement = document.createElement('div');
+                transactionElement.className = 'transaction-item';
+                
+                const typeClass = transaction.type === 'deposit' ? 'deposit' : 'withdrawal';
+                const typeText = transaction.type === 'deposit' ? 'Depósito' : 'Retiro';
+                const amountPrefix = transaction.type === 'deposit' ? '+' : '-';
+                
+                transactionElement.innerHTML = `
+                    <div>${transaction.account.toUpperCase()}</div>
+                    <div>${typeText}</div>
+                    <div class="${typeClass}">${amountPrefix}$${transaction.amount.toFixed(2)}</div>
+                    <div>${transaction.description}</div>
+                `;
+                
+                transactionsContainer.appendChild(transactionElement);
+            });
+        }
+        
+        // Inicializar tabla de forecast
+        function initForecastTable() {
+            const concepts = [
+                { type: 'section', name: 'INGRESOS' },
+                { name: 'Salario', type: 'income', editable: true },
+                { name: 'Bono', type: 'income', editable: true },
+                { name: 'Propina', type: 'income', editable: true },
+                { name: 'Subtotal 1', type: 'subtotal', editable: false },
+                { type: 'section', name: 'GASTOS' },
+                { name: 'Gym', type: 'expense', editable: true },
+                { name: 'Bulenox', type: 'expense', editable: true },
+                { name: 'Otros Gastos', type: 'expense', editable: true },
+                { name: 'Subtotal 2', type: 'subtotal', editable: false },
+                { name: 'TOTAL', type: 'total', editable: false }
+            ];
+            
+            forecastBody.innerHTML = '';
+            
+            concepts.forEach(concept => {
+                if (concept.type === 'section') {
+                    // Crear fila de título de sección
+                    const sectionRow = document.createElement('tr');
+                    const sectionCell = document.createElement('td');
+                    sectionCell.colSpan = 7;
+                    sectionCell.textContent = concept.name;
+                    sectionCell.className = 'section-title';
+                    sectionRow.appendChild(sectionCell);
+                    forecastBody.appendChild(sectionRow);
+                } else {
+                    // Crear fila normal
+                    const row = document.createElement('tr');
+                    
+                    // Columna de concepto
+                    const conceptCell = document.createElement('td');
+                    conceptCell.textContent = concept.name;
+                    conceptCell.className = 'concept';
+                    row.appendChild(conceptCell);
+                    
+                    // Columnas de semanas
+                    for (let i = 1; i <= 4; i++) {
+                        const cell = document.createElement('td');
+                        
+                        if (concept.editable) {
+                            const input = document.createElement('input');
+                            input.type = 'number';
+                            input.value = '0';
+                            input.dataset.concept = concept.name;
+                            input.dataset.week = i;
+                            input.addEventListener('input', calculateTotals);
+                            cell.appendChild(input);
+                        } else {
+                            cell.textContent = '0';
+                            cell.dataset.concept = concept.name;
+                            cell.dataset.week = 'all';
+                        }
+                        
+                        row.appendChild(cell);
+                    }
+                    
+                    // Columna de Total Mensual
+                    const monthlyTotalCell = document.createElement('td');
+                    monthlyTotalCell.textContent = '0';
+                    monthlyTotalCell.dataset.concept = concept.name + '-monthly';
+                    row.appendChild(monthlyTotalCell);
+                    
+                    // Columna de acción (solo para filas editables)
+                    const actionCell = document.createElement('td');
+                    if (concept.editable) {
+                        const deleteBtn = document.createElement('button');
+                        deleteBtn.textContent = 'Eliminar';
+                        deleteBtn.className = 'delete-btn';
+                        deleteBtn.addEventListener('click', () => {
+                            showConfirmationModal('eliminar', concept.name, row);
+                        });
+                        actionCell.appendChild(deleteBtn);
+                    }
+                    row.appendChild(actionCell);
+                    
+                    // Aplicar clases según el tipo
+                    if (concept.type === 'subtotal') {
+                        row.classList.add('subtotal');
+                    } else if (concept.type === 'total') {
+                        row.classList.add('total');
+                    }
+                    
+                    forecastBody.appendChild(row);
+                }
+            });
+            
+            calculateTotals();
+        }
+        
+        // Calcular totales en la tabla de forecast
+        function calculateTotals() {
+            const rows = forecastBody.querySelectorAll('tr');
+            const incomeRows = [];
+            const expenseRows = [];
+            
+            // Identificar todas las filas de ingresos y gastos (excluyendo filas temporales)
+            let currentSection = '';
+            
+            rows.forEach(row => {
+                // Saltar filas temporales
+                if (row.classList.contains('temp-row')) return;
+                
+                const sectionCell = row.querySelector('.section-title');
+                if (sectionCell) {
+                    currentSection = sectionCell.textContent;
+                    return;
+                }
+                
+                const conceptCell = row.querySelector('.concept');
+                if (!conceptCell) return;
+                
+                const concept = conceptCell.textContent;
+                
+                // Si es una fila editable, agregar a la lista correspondiente
+                if (row.querySelector('input')) {
+                    if (currentSection === 'INGRESOS') {
+                        incomeRows.push(row);
+                    } else if (currentSection === 'GASTOS') {
+                        expenseRows.push(row);
+                    }
+                }
+            });
+            
+            // Calcular subtotales por semana
+            const subtotal1 = [0, 0, 0, 0]; // Ingresos por semana
+            const subtotal2 = [0, 0, 0, 0]; // Gastos por semana
+            
+            // Sumar todos los ingresos
+            incomeRows.forEach(row => {
+                const inputs = row.querySelectorAll('input');
+                inputs.forEach((input, weekIndex) => {
+                    const value = parseFloat(input.value) || 0;
+                    subtotal1[weekIndex] += value;
+                });
+            });
+            
+            // Sumar todos los gastos
+            expenseRows.forEach(row => {
+                const inputs = row.querySelectorAll('input');
+                inputs.forEach((input, weekIndex) => {
+                    const value = parseFloat(input.value) || 0;
+                    subtotal2[weekIndex] += value;
+                });
+            });
+            
+            // Calcular totales por semana
+            const weeklyTotals = [0, 0, 0, 0];
+            for (let i = 0; i < 4; i++) {
+                weeklyTotals[i] = subtotal1[i] - subtotal2[i];
+            }
+            
+            // Actualizar todas las filas de totales
+            rows.forEach(row => {
+                // Saltar filas temporales
+                if (row.classList.contains('temp-row')) return;
+                
+                const conceptCell = row.querySelector('.concept');
+                if (!conceptCell) return;
+                
+                const concept = conceptCell.textContent;
+                const cells = row.querySelectorAll('td:not(.concept)');
+                const monthlyTotalCell = cells[4]; // La quinta celda es el total mensual
+                
+                if (concept === 'Subtotal 1') {
+                    // Actualizar semanas
+                    cells.forEach((cell, index) => {
+                        if (index < 4 && cell.dataset.week === 'all') {
+                            cell.textContent = subtotal1[index].toFixed(2);
+                        }
+                    });
+                    // Actualizar total mensual
+                    const monthlyTotal = subtotal1.reduce((sum, val) => sum + val, 0);
+                    monthlyTotalCell.textContent = monthlyTotal.toFixed(2);
+                    
+                } else if (concept === 'Subtotal 2') {
+                    // Actualizar semanas
+                    cells.forEach((cell, index) => {
+                        if (index < 4 && cell.dataset.week === 'all') {
+                            cell.textContent = subtotal2[index].toFixed(2);
+                        }
+                    });
+                    // Actualizar total mensual
+                    const monthlyTotal = subtotal2.reduce((sum, val) => sum + val, 0);
+                    monthlyTotalCell.textContent = monthlyTotal.toFixed(2);
+                    
+                } else if (concept === 'TOTAL') {
+                    // Actualizar semanas
+                    cells.forEach((cell, index) => {
+                        if (index < 4 && cell.dataset.week === 'all') {
+                            cell.textContent = weeklyTotals[index].toFixed(2);
+                            // Aplicar color según ganancia o pérdida
+                            if (weeklyTotals[index] > 0) {
+                                cell.className = 'profit';
+                            } else if (weeklyTotals[index] < 0) {
+                                cell.className = 'loss';
+                            } else {
+                                cell.className = '';
+                            }
+                        }
+                    });
+                    // Actualizar total mensual (P&L)
+                    const monthlyTotal = weeklyTotals.reduce((sum, val) => sum + val, 0);
+                    monthlyTotalCell.textContent = monthlyTotal.toFixed(2);
+                    if (monthlyTotal > 0) {
+                        monthlyTotalCell.className = 'profit';
+                    } else if (monthlyTotal < 0) {
+                        monthlyTotalCell.className = 'loss';
+                    } else {
+                        monthlyTotalCell.className = '';
+                    }
+                    
+                } else if (row.querySelector('input')) {
+                    // Para filas editables, calcular su total mensual
+                    const inputs = row.querySelectorAll('input');
+                    let rowMonthlyTotal = 0;
+                    inputs.forEach(input => {
+                        rowMonthlyTotal += parseFloat(input.value) || 0;
+                    });
+                    monthlyTotalCell.textContent = rowMonthlyTotal.toFixed(2);
+                }
+            });
+        }
+        
+        // Agregar nueva fila de ingreso
+        function addIncomeRow() {
+            const newRow = createEditableRow('income');
+            insertRowInSection(newRow, 'INGRESOS', 'Subtotal 1');
+            showNotification('Complete los datos y confirme para agregar el nuevo ingreso', 'success');
+        }
+        
+        // Agregar nueva fila de gasto
+        function addExpenseRow() {
+            const newRow = createEditableRow('expense');
+            insertRowInSection(newRow, 'GASTOS', 'Subtotal 2');
+            showNotification('Complete los datos y confirme para agregar el nuevo gasto', 'success');
+        }
+        
+        // Crear fila editable TEMPORAL con botones de confirmación
+        function createEditableRow(type) {
+            const newRow = document.createElement('tr');
+            newRow.className = 'temp-row';
+            
+            // Columna de concepto
+            const conceptCell = document.createElement('td');
+            const conceptInput = document.createElement('input');
+            conceptInput.type = 'text';
+            conceptInput.placeholder = type === 'income' ? 'Nuevo ingreso' : 'Nuevo gasto';
+            conceptInput.className = 'concept-input';
+            conceptCell.appendChild(conceptInput);
+            newRow.appendChild(conceptCell);
+            
+            // Columnas de semanas
+            for (let i = 1; i <= 4; i++) {
+                const cell = document.createElement('td');
+                const input = document.createElement('input');
+                input.type = 'number';
+                input.value = '0';
+                input.dataset.week = i;
+                input.addEventListener('input', calculateTotals);
+                cell.appendChild(input);
+                newRow.appendChild(cell);
+            }
+            
+            // Columna de Total Mensual
+            const monthlyTotalCell = document.createElement('td');
+            monthlyTotalCell.textContent = '0';
+            newRow.appendChild(monthlyTotalCell);
+            
+            // Columna de acción con botones de confirmar/cancelar
+            const actionCell = document.createElement('td');
+            
+            const confirmBtn = document.createElement('button');
+            confirmBtn.textContent = 'Confirmar';
+            confirmBtn.className = 'confirm-add-btn';
+            confirmBtn.addEventListener('click', () => {
+                confirmNewRow(newRow, type, conceptInput.value);
+            });
+            
+            const cancelBtn = document.createElement('button');
+            cancelBtn.textContent = 'Cancelar';
+            cancelBtn.className = 'cancel-add-btn';
+            cancelBtn.addEventListener('click', () => {
+                newRow.remove();
+                showNotification('Agregado cancelado', 'error');
+            });
+            
+            actionCell.appendChild(confirmBtn);
+            actionCell.appendChild(cancelBtn);
+            newRow.appendChild(actionCell);
+            
+            return newRow;
+        }
+
+        // Confirmar y convertir fila temporal en permanente
+        function confirmNewRow(tempRow, type, conceptName) {
+            if (!conceptName.trim()) {
+                showNotification('Por favor ingresa un nombre para el concepto', 'error');
+                return;
+            }
+
+            // Crear nueva fila permanente
+            const permanentRow = document.createElement('tr');
+            
+            // Columna de concepto (texto fijo)
+            const conceptCell = document.createElement('td');
+            conceptCell.textContent = conceptName;
+            conceptCell.className = 'concept';
+            permanentRow.appendChild(conceptCell);
+            
+            // Obtener los valores de los inputs de la fila temporal
+            const tempInputs = tempRow.querySelectorAll('input[type="number"]');
+            
+            // Columnas de semanas (mantener valores pero como inputs permanentes)
+            for (let i = 0; i < 4; i++) {
+                const cell = document.createElement('td');
+                const input = document.createElement('input');
+                input.type = 'number';
+                input.value = tempInputs[i].value || '0';
+                input.dataset.week = i + 1;
+                input.addEventListener('input', calculateTotals);
+                cell.appendChild(input);
+                permanentRow.appendChild(cell);
+            }
+            
+            // Columna de Total Mensual
+            const monthlyTotalCell = document.createElement('td');
+            monthlyTotalCell.textContent = '0';
+            permanentRow.appendChild(monthlyTotalCell);
+            
+            // Columna de acción con botón eliminar
+            const actionCell = document.createElement('td');
+            const deleteBtn = document.createElement('button');
+            deleteBtn.textContent = 'Eliminar';
+            deleteBtn.className = 'delete-btn';
+            deleteBtn.addEventListener('click', () => {
+                showConfirmationModal('eliminar', conceptName, permanentRow);
+            });
+            actionCell.appendChild(deleteBtn);
+            permanentRow.appendChild(actionCell);
+            
+            // Reemplazar la fila temporal con la permanente
+            tempRow.parentNode.replaceChild(permanentRow, tempRow);
+            
+            // Recalcular totales
+            calculateTotals();
+            
+            showNotification(`${type === 'income' ? 'Ingreso' : 'Gasto'} "${conceptName}" agregado correctamente`, 'success');
+        }
+        
+        // Insertar fila en la sección correspondiente
+        function insertRowInSection(newRow, sectionName, beforeRowName) {
+            const rows = forecastBody.querySelectorAll('tr');
+            let insertIndex = -1;
+            
+            // Encontrar la posición donde insertar (antes de la fila especificada)
+            rows.forEach((row, index) => {
+                const conceptCell = row.querySelector('.concept');
+                if (conceptCell && conceptCell.textContent === beforeRowName) {
+                    insertIndex = index;
+                }
+            });
+            
+            if (insertIndex !== -1) {
+                forecastBody.insertBefore(newRow, rows[insertIndex]);
+            } else {
+                forecastBody.appendChild(newRow);
+            }
+        }
+        
+        // Mostrar modal de confirmación
+        function showConfirmationModal(action, itemName, row) {
+            pendingAction = action;
+            pendingRow = row;
+            confirmationMessage.textContent = `¿Estás seguro de ${action} "${itemName}"?`;
+            confirmationModal.style.display = 'flex';
+        }
+        
+        // Event listeners
+        addTransactionButton.addEventListener('click', addTransaction);
+        confirmationCheckbox.addEventListener('change', validateForm);
+        addIncomeButton.addEventListener('click', addIncomeRow);
+        addExpenseButton.addEventListener('click', addExpenseRow);
+        
+        // Modal de confirmación
+        confirmActionButton.addEventListener('click', () => {
+            if (pendingAction === 'eliminar' && pendingRow) {
+                pendingRow.remove();
+                calculateTotals();
+                showNotification('Elemento eliminado correctamente', 'success');
+            }
+            confirmationModal.style.display = 'none';
+            pendingAction = null;
+            pendingRow = null;
+        });
+        
+        cancelActionButton.addEventListener('click', () => {
+            confirmationModal.style.display = 'none';
+            pendingAction = null;
+            pendingRow = null;
+        });
+        
+        // Validar formulario cuando cambien los campos
+        document.getElementById('amount').addEventListener('input', validateForm);
+        document.getElementById('description').addEventListener('input', validateForm);
+        
+        // Permitir agregar transacción con Enter
+        document.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !addTransactionButton.disabled) {
+                addTransaction();
+            }
+        });
+        
+        // Inicializar la aplicación
+        checkLoggedIn();
+    </script>
+</body>
+</html>
